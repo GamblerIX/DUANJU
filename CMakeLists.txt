@@ -24,10 +24,12 @@ if(PkgConfig_FOUND)
     pkg_check_modules(MPV QUIET mpv)
 endif()
 
+# Include FetchContent module
+include(FetchContent)
+
 # Find Google Test
 find_package(GTest QUIET)
 if(NOT GTest_FOUND)
-    include(FetchContent)
     FetchContent_Declare(
         googletest
         GIT_REPOSITORY https://github.com/google/googletest.git
@@ -38,6 +40,7 @@ if(NOT GTest_FOUND)
 endif()
 
 # Find RapidCheck for property-based testing
+set(RC_ENABLE_GTEST ON CACHE BOOL "Enable RapidCheck GTest integration")
 FetchContent_Declare(
     rapidcheck
     GIT_REPOSITORY https://github.com/emil-e/rapidcheck.git
@@ -147,6 +150,7 @@ add_executable(${PROJECT_NAME}_tests ${TEST_SOURCES})
 
 target_include_directories(${PROJECT_NAME}_tests PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${rapidcheck_SOURCE_DIR}/include
     ${rapidcheck_SOURCE_DIR}/extras/gtest/include
 )
 
@@ -159,7 +163,6 @@ target_link_libraries(${PROJECT_NAME}_tests PRIVATE
     GTest::gtest_main
     GTest::gmock
     rapidcheck
-    rapidcheck_gtest
 )
 
 include(GoogleTest)
