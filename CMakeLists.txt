@@ -140,17 +140,20 @@ set(TEST_SOURCES
     src/utils/configmanager.cpp
     src/utils/logmanager.cpp
     src/api/apiclient.cpp
+    src/widgets/searchwidget.cpp
 )
 
 add_executable(${PROJECT_NAME}_tests ${TEST_SOURCES})
 
 target_include_directories(${PROJECT_NAME}_tests PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${rapidcheck_SOURCE_DIR}/extras/gtest/include
 )
 
 target_link_libraries(${PROJECT_NAME}_tests PRIVATE
     Qt6::Core
     Qt6::Network
+    Qt6::Widgets
     Qt6::Test
     GTest::gtest
     GTest::gtest_main

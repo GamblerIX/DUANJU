@@ -82,7 +82,7 @@ TEST_F(ApiClientTest, BuildVideoUrl_ContainsVideoId) {
 // **Validates: Requirements 2.2**
 TEST_F(ApiClientTest, BuildCategoryUrl_ContainsClassnameParameter) {
     QString category = "甜宠";
-    QUrl url = client->buildCategoryUrl(category);
+    QUrl url = client->buildCategoryUrl(category, 1);
     
     QUrlQuery query(url);
     EXPECT_TRUE(query.hasQueryItem("classname"));

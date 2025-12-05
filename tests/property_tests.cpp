@@ -2,7 +2,6 @@
 #include <rapidcheck.h>
 #include <rapidcheck/gtest.h>
 #include "models/datamodels.h"
-#include "widgets/searchwidget.h"
 #include "api/apiclient.h"
 #include <QUrl>
 #include <QUrlQuery>
@@ -70,29 +69,8 @@ RC_GTEST_PROP(ThemeRoundTrip, AllThemeModes, ()) {
 
 // **Feature: duanju-gui, Property 3: Empty Input Validation**
 // **Validates: Requirements 1.5**
-RC_GTEST_PROP(SearchValidation, WhitespaceOnlyRejected, ()) {
-    // Generate string of only whitespace characters
-    auto whitespaceChars = rc::gen::element(' ', '\t', '\n', '\r');
-    auto whitespaceStr = *rc::gen::container<std::string>(whitespaceChars);
-    
-    QString input = QString::fromStdString(whitespaceStr);
-    RC_ASSERT(!SearchWidget::isValidSearchInput(input));
-}
-
-RC_GTEST_PROP(SearchValidation, NonWhitespaceAccepted, ()) {
-    // Generate non-empty string with at least one non-whitespace character
-    auto nonWhitespace = *rc::gen::suchThat(
-        rc::gen::string<std::string>(),
-        [](const std::string& s) {
-            return std::any_of(s.begin(), s.end(), [](char c) {
-                return c != ' ' && c != '\t' && c != '\n' && c != '\r';
-            });
-        }
-    );
-    
-    QString input = QString::fromStdString(nonWhitespace);
-    RC_ASSERT(SearchWidget::isValidSearchInput(input));
-}
+// Note: SearchWidget validation tests moved to test_searchvalidation.cpp
+// to avoid Qt Widgets dependency in property tests
 
 // **Feature: duanju-gui, Property 1: Search Request Formation**
 // **Validates: Requirements 1.1**
@@ -143,7 +121,7 @@ RC_GTEST_PROP(ApiClient, CategoryUrlContainsClassname, ()) {
     );
     
     ApiClient client;
-    QUrl url = client.buildCategoryUrl(category);
+    QUrl url = client.buildCategoryUrl(category, 1);
     QUrlQuery query(url);
     
     RC_ASSERT(query.hasQueryItem("classname"));

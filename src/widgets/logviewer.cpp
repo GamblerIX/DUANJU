@@ -3,6 +3,7 @@
 #include <QHBoxLayout>
 #include <QFileDialog>
 #include <QScrollBar>
+#include <QLabel>
 
 LogViewer::LogViewer(QWidget* parent)
     : QWidget(parent)
