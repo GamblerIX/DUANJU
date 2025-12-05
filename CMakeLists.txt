@@ -146,7 +146,14 @@ set(TEST_SOURCES
     src/widgets/searchwidget.cpp
 )
 
-add_executable(${PROJECT_NAME}_tests ${TEST_SOURCES})
+set(TEST_HEADERS
+    include/utils/configmanager.h
+    include/utils/logmanager.h
+    include/api/apiclient.h
+    include/widgets/searchwidget.h
+)
+
+add_executable(${PROJECT_NAME}_tests ${TEST_SOURCES} ${TEST_HEADERS})
 
 target_include_directories(${PROJECT_NAME}_tests PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
