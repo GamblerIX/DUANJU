@@ -50,8 +50,8 @@ jobs:
           pyinstaller --noconfirm --onefile --windowed `
             --icon=../.github/workflows/favicon.ico `
             --add-data "assets;assets" `
-            --add-data "src;src" `
-            --collect-submodules=src `
+            --paths=. `
+            --collect-all=src `
             --name DUANJU-${{ inputs.build_type }}-${{ inputs.version }} `
             --distpath ../dist `
             main.py
