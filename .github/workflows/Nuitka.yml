@@ -41,22 +41,8 @@ jobs:
             --windows-icon-from-ico=../.github/workflows/favicon.ico `
             --enable-plugin=pyqt6 `
             --include-data-dir=assets=assets `
-            --include-package=src `
-            --include-package=src.core `
-            --include-package=src.core.utils `
-            --include-package=src.data `
-            --include-package=src.data.api `
-            --include-package=src.data.cache `
-            --include-package=src.data.config `
-            --include-package=src.data.favorites `
-            --include-package=src.data.history `
-            --include-package=src.data.image `
-            --include-package=src.services `
-            --include-package=src.ui `
-            --include-package=src.ui.controls `
-            --include-package=src.ui.dialogs `
-            --include-package=src.ui.interfaces `
-            --include-package=src.ui.windows `
+            --include-data-dir=src=src `
+            --follow-imports `
             --output-filename=DUANJU-${{ inputs.version }}.exe `
             --output-dir=../dist `
             main.py
