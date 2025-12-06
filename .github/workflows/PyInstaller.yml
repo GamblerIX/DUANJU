@@ -1,0 +1,62 @@
+name: PyInstaller Build (Quick Test)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号 (如 1.0.0)'
+        required: true
+        type: string
+      build_type:
+        description: '构建类型'
+        required: true
+        type: choice
+        options:
+          - Release
+          - Debug
+        default: Release
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      build_type:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ${{ inputs.build_type }}/requirements.txt
+          pip install pyinstaller
+
+      - name: Build with PyInstaller
+        run: |
+          cd ${{ inputs.build_type }}
+          pyinstaller --noconfirm --onefile --windowed `
+            --icon=../.github/workflows/favicon.ico `
+            --add-data "assets;assets" `
+            --name DUANJU-${{ inputs.build_type }}-${{ inputs.version }} `
+            --distpath ../dist `
+            main.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DUANJU-PyInstaller-${{ inputs.build_type }}-${{ inputs.version }}
+          path: dist/DUANJU-${{ inputs.build_type }}-${{ inputs.version }}.exe
+          retention-days: 14

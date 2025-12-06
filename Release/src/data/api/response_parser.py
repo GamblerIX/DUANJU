@@ -1,0 +1,115 @@
+import json
+import re
+from typing import List, Optional, Tuple
+from ...core.models import (DramaInfo, EpisodeInfo, EpisodeList, VideoInfo, 
+                            SearchResult, CategoryResult, ApiError)
+
+
+class ResponseParser:
+    @staticmethod
+    def check_response_status(data: dict) -> Tuple[bool, Optional[str]]:
+        code = data.get("code", 0)
+        if code == 200:
+            return True, None
+        else:
+            msg = data.get("msg", "未知错误")
+            return False, msg
+    
+    @staticmethod
+    def parse_search_result(json_str: str) -> SearchResult:
+        data = json.loads(json_str)
+        dramas = []
+        for item in data.get("data", []):
+            dramas.append(DramaInfo(
+                book_id=str(item.get("book_id", "")), title=item.get("title", ""),
+                cover=item.get("cover", ""), episode_cnt=int(item.get("episode_cnt", 0)),
+                intro=item.get("intro", ""), type=item.get("type", ""),
+                author=item.get("author", ""), play_cnt=int(item.get("play_cnt", 0))
+            ))
+        page = data.get("page", 1)
+        if isinstance(page, str):
+            page = int(page) if page.isdigit() else 1
+        return SearchResult(code=data.get("code", 0), msg=data.get("msg", ""), data=dramas, page=page)
+    
+    @staticmethod
+    def parse_episode_number(title: str) -> int:
+        match = re.search(r'第(\d+)集', title)
+        if match:
+            return int(match.group(1))
+        match = re.search(r'(\d+)', title)
+        if match:
+            return int(match.group(1))
+        return 0
+
+    @staticmethod
+    def parse_episode_list(json_str: str) -> EpisodeList:
+        data = json.loads(json_str)
+        episodes = []
+        for item in data.get("data", []):
+            title = item.get("title", "")
+            episodes.append(EpisodeInfo(
+                video_id=str(item.get("video_id", "")), title=title,
+                episode_number=ResponseParser.parse_episode_number(title),
+                chapter_word_number=int(item.get("chapter_word_number", 0))
+            ))
+        total = data.get("total", 0)
+        if isinstance(total, str):
+            total = int(total) if total.isdigit() else 0
+        return EpisodeList(
+            code=data.get("code", 0), book_name=data.get("book_name", ""),
+            episodes=episodes, total=total, book_id=str(data.get("book_id", "")),
+            author=data.get("author", ""), category=data.get("category", ""),
+            desc=data.get("desc", ""), duration=data.get("duration", ""),
+            book_pic=data.get("book_pic", "")
+        )
+    
+    @staticmethod
+    def parse_video_info(json_str: str) -> VideoInfo:
+        data = json.loads(json_str)
+        video_data = data.get("data", {})
+        info = video_data.get("info", {})
+        return VideoInfo(
+            code=data.get("code", 0), url=video_data.get("url", ""),
+            pic=video_data.get("pic", ""), quality=info.get("quality", ""),
+            title=video_data.get("title", ""), duration=info.get("duration", ""),
+            size_str=info.get("size_str", "")
+        )
+    
+    @staticmethod
+    def parse_category_result(json_str: str, category: str = "") -> CategoryResult:
+        data = json.loads(json_str)
+        dramas = []
+        for item in data.get("data", []):
+            dramas.append(DramaInfo(
+                book_id=str(item.get("book_id", "")), title=item.get("title", ""),
+                cover=item.get("cover", ""), episode_cnt=int(item.get("episode_cnt", 0)),
+                intro=item.get("video_desc", ""), type=item.get("sub_title", category),
+                author="", play_cnt=int(item.get("play_cnt", 0))
+            ))
+        return CategoryResult(code=data.get("code", 0), category=category, data=dramas, offset=1)
+    
+    @staticmethod
+    def parse_recommendations(json_str: str) -> List[DramaInfo]:
+        data = json.loads(json_str)
+        dramas = []
+        for item in data.get("data", []):
+            book_data = item.get("book_data", {})
+            serial_count = book_data.get("serial_count", 0)
+            if isinstance(serial_count, str):
+                serial_count = int(serial_count) if serial_count.isdigit() else 0
+            dramas.append(DramaInfo(
+                book_id=str(book_data.get("book_id", "")), title=book_data.get("book_name", ""),
+                cover=book_data.get("thumb_url", ""), episode_cnt=serial_count,
+                intro="", type=book_data.get("category", ""), author="",
+                play_cnt=int(item.get("hot", 0))
+            ))
+        return dramas
+    
+    @staticmethod
+    def parse_error(json_str: str) -> ApiError:
+        try:
+            data = json.loads(json_str)
+            return ApiError(code=data.get("code", 0), message=data.get("msg", "未知错误"), details="")
+        except json.JSONDecodeError:
+            return ApiError(code=0, message="JSON 解析失败", 
+                          details=json_str[:200] if len(json_str) > 200 else json_str)

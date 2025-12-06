@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号 (如 1.0.0)'
+        required: true
+        type: string
+      build_tool:
+        description: '打包工具'
+        required: true
+        type: choice
+        options:
+          - Nuitka
+          - PyInstaller
+      prerelease:
+        description: '预发布版本'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  build-nuitka:
+    if: inputs.build_tool == 'Nuitka'
+    uses: ./.github/workflows/Nuitka.yml
+    with:
+      version: ${{ inputs.version }}
+
+  build-pyinstaller:
+    if: inputs.build_tool == 'PyInstaller'
+    uses: ./.github/workflows/PyInstaller.yml
+    with:
+      version: ${{ inputs.version }}
+      build_type: Release
+
+  release:
+    needs: [build-nuitka, build-pyinstaller]
+    if: always() && (needs.build-nuitka.result == 'success' || needs.build-pyinstaller.result == 'success')
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download Nuitka artifact
+        if: inputs.build_tool == 'Nuitka'
+        uses: actions/download-artifact@v4
+        with:
+          name: DUANJU-Nuitka-${{ inputs.version }}
+          path: dist
+
+      - name: Download PyInstaller artifact
+        if: inputs.build_tool == 'PyInstaller'
+        uses: actions/download-artifact@v4
+        with:
+          name: DUANJU-PyInstaller-Release-${{ inputs.version }}
+          path: dist
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version }}
+          name: DUANJU v${{ inputs.version }}
+          prerelease: ${{ inputs.prerelease }}
+          generate_release_notes: true
+          files: dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
