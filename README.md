@@ -15,19 +15,19 @@
 
 ```bash
 # Gitee
-pkg install -y curl && curl -sL https://gitee.com/GamblerIX/DUANJU/raw/main/Termux/install.sh | bash
+pkg install -y curl && curl -sL https://gitee.com/GamblerIX/DUANJU/raw/termux/install.sh | bash
 
 # GitHub
-pkg install -y curl && curl -sL https://raw.githubusercontent.com/GamblerIX/DUANJU/main/Termux/install.sh | bash
+pkg install -y curl && curl -sL https://raw.githubusercontent.com/GamblerIX/DUANJU/termux/install.sh | bash
 ```
 
 ### 手动安装
 
 ```bash
 pkg update && pkg install -y python git
-git clone https://gitee.com/GamblerIX/DUANJU.git ~/duanju
+git clone -b termux https://gitee.com/GamblerIX/DUANJU.git ~/duanju
 pip install flask requests
-echo "alias dj='cd ~/duanju/Termux && python server.py'" >> ~/.bashrc
+echo "alias dj='cd ~/duanju && python server.py'" >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -38,7 +38,7 @@ source ~/.bashrc
 dj
 
 # 或
-cd ~/duanju/Termux && python server.py
+cd ~/duanju && python server.py
 ```
 
 启动后在浏览器打开显示的地址（如 `http://192.168.1.100:8080`）。

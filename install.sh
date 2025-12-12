@@ -18,6 +18,7 @@ NC='\033[0m'
 # 安装目录
 INSTALL_DIR="$HOME/duanju"
 REPO_URL="https://gitee.com/GamblerIX/DUANJU.git"
+BRANCH="termux"
 
 print_status() {
     echo -e "${GREEN}[✓]${NC} $1"
@@ -80,17 +81,17 @@ setup_project() {
     if [ -d "$INSTALL_DIR" ]; then
         print_warning "检测到已有安装，正在更新..."
         cd "$INSTALL_DIR"
-        git pull origin main || git pull origin master || {
+        git pull origin "$BRANCH" || {
             print_warning "更新失败，尝试重新克隆..."
             cd "$HOME"
             rm -rf "$INSTALL_DIR"
-            git clone "$REPO_URL" "$INSTALL_DIR" || {
+            git clone -b "$BRANCH" "$REPO_URL" "$INSTALL_DIR" || {
                 print_error "克隆仓库失败"
                 exit 1
             }
         }
     else
-        git clone "$REPO_URL" "$INSTALL_DIR" || {
+        git clone -b "$BRANCH" "$REPO_URL" "$INSTALL_DIR" || {
             print_error "克隆仓库失败"
             exit 1
         }
@@ -117,7 +118,7 @@ setup_shortcut() {
     fi
     
     # 添加别名
-    echo "alias dj='cd $INSTALL_DIR/Termux && python server.py'" >> "$SHELL_RC"
+    echo "alias dj='cd $INSTALL_DIR && python server.py'" >> "$SHELL_RC"
     print_status "快捷指令 'dj' 已配置"
 }
 
@@ -134,7 +135,7 @@ show_completion() {
     echo "  3. 在浏览器访问显示的地址"
     echo ""
     echo "  或者直接运行:"
-    echo "  cd $INSTALL_DIR/Termux && python server.py"
+    echo "  cd $INSTALL_DIR && python server.py"
     echo ""
     echo "=================================================="
 }
