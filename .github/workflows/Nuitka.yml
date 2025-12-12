@@ -37,7 +37,7 @@ jobs:
         run: |
           python -m nuitka --standalone --onefile `
             --windows-console-mode=disable `
-            --windows-icon-from-ico=.github/workflows/favicon.ico `
+            --windows-icon-from-ico=icon.ico `
             --enable-plugin=pyside6 `
             --include-data-dir=assets=assets `
             --output-filename=Duanju-${{ inputs.version }}.exe `

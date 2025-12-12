@@ -36,7 +36,7 @@ jobs:
       - name: Build with PyInstaller
         run: |
           pyinstaller --noconfirm --onefile --windowed `
-            --icon=.github/workflows/favicon.ico `
+            --icon=icon.ico `
             --add-data "assets;assets" `
             --name Duanju-${{ inputs.version }} `
             --distpath dist `

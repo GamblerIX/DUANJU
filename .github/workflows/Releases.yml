@@ -10,15 +10,21 @@ on:
         description: '版本号 (如 1.0.0)'
         required: true
         type: string
-      build_tool:
-        description: '打包工具'
-        required: true
-        type: choice
-        options:
-          - PyAppify
-          - Nuitka
-          - PyInstaller
-        default: 'PyAppify'
+      build_pyappify:
+        description: '使用 PyAppify 打包'
+        required: false
+        type: boolean
+        default: true
+      build_nuitka:
+        description: '使用 Nuitka 打包'
+        required: false
+        type: boolean
+        default: false
+      build_pyinstaller:
+        description: '使用 PyInstaller 打包'
+        required: false
+        type: boolean
+        default: false
       prerelease:
         description: '预发布版本'
         required: false
@@ -27,7 +33,7 @@ on:
 
 jobs:
   build-pyappify:
-    if: inputs.build_tool == 'PyAppify'
+    if: inputs.build_pyappify
     runs-on: windows-latest
     steps:
       - name: Checkout repository
@@ -40,16 +46,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: DUANJU-PyAppify-${{ inputs.version }}
-          path: pyappify_dist/*
+          path: pyappify_dist/*-release-setup.exe
 
   build-nuitka:
-    if: inputs.build_tool == 'Nuitka'
+    if: inputs.build_nuitka
     uses: ./.github/workflows/Nuitka.yml
     with:
       version: ${{ inputs.version }}
 
   build-pyinstaller:
-    if: inputs.build_tool == 'PyInstaller'
+    if: inputs.build_pyinstaller
     uses: ./.github/workflows/PyInstaller.yml
     with:
       version: ${{ inputs.version }}
@@ -61,60 +67,53 @@ jobs:
 
     steps:
       - name: Download PyAppify artifact
-        if: inputs.build_tool == 'PyAppify'
+        if: inputs.build_pyappify && needs.build-pyappify.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: DUANJU-PyAppify-${{ inputs.version }}
-          path: dist
+          path: dist/pyappify
 
       - name: Download Nuitka artifact
-        if: inputs.build_tool == 'Nuitka'
+        if: inputs.build_nuitka && needs.build-nuitka.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: Duanju-Nuitka-${{ inputs.version }}
-          path: dist
+          path: dist/nuitka
 
       - name: Download PyInstaller artifact
-        if: inputs.build_tool == 'PyInstaller'
+        if: inputs.build_pyinstaller && needs.build-pyinstaller.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: Duanju-PyInstaller-${{ inputs.version }}
-          path: dist
+          path: dist/pyinstaller
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ inputs.version }}
-          name: DUANJU v${{ inputs.version }}
+          name: v${{ inputs.version }}
           prerelease: ${{ inputs.prerelease }}
           generate_release_notes: true
           body: |
-            ## DUANJU 短剧播放器 v${{ inputs.version }}
+            ## 下载说明
+            - **PyAppify**: 完整安装包
+            - **Nuitka**: 单文件可执行程序，性能优化
+            - **PyInstaller**: 单文件可执行程序，快速构建
 
-            打包工具: ${{ inputs.build_tool }}
-
-            ### 下载说明
-            | 文件 | 说明 |
-            |------|------|
-            | `DUANJU-win32.zip` | 便携版，解压即用 |
-            | `DUANJU-win32-release-setup.exe` | 完整安装包 |
-            | `DUANJU-win32-online-setup.exe` | 在线安装包（体积小，需联网） |
-
-            ### 使用方法
-            1. 下载上述任一版本
-            2. 便携版解压后运行 `DUANJU.exe`，安装版双击安装
-            3. 首次启动会自动配置环境
-
-            ### Termux (Android)
+            ## 源码运行
             ```bash
-            curl -sL https://gitee.com/GamblerIX/DUANJU/raw/main/Termux/install.sh | bash
-            ```
-
-            ### 源码运行
-            ```bash
+            git clone -b main https://github.com/GamblerIX/DUANJU
             pip install -r requirements.txt
             python main.py
             ```
-          files: dist/*
+
+            Debug 版本请切换到 dev 分支：`git checkout dev`
+
+            ## Termux (Android)
+            ```bash
+            curl -sL https://gitee.com/GamblerIX/DUANJU/raw/Termux/install.sh | bash
+            ```
+          files: |
+            dist/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
