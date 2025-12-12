@@ -1,53 +1,40 @@
-# DUANJU Release 版本
+# DUANJU Debug 版本
 
-生产环境版本，代码合并为单文件，优化性能。
+开发调试版本，包含完整日志系统和模块化代码结构。
 
-## 快速开始
-
-### 方式一：直接运行
-
-从 [Releases](../../releases) 下载最新版本，双击运行。
-
-### 方式二：源码运行
+## 运行
 
 ```bash
 pip install -r requirements.txt
 python main.py
 ```
 
-## 功能
-
-- 🔍 短剧搜索与浏览
-- 📂 分类筛选与推荐
-- ▶️ VLC / 浏览器双播放模式
-- ⬇️ 视频下载
-- ⭐ 收藏夹管理
-- 📜 观看历史记录
-- 🎨 明暗主题切换
-
-## 系统要求
-
-- Windows 10/11
-- Python 3.10+（源码运行）
-
 ## 目录结构
 
 ```
-Release/
-├── main.py              # 应用入口（单文件，含所有模块）
+Debug/
+├── main.py              # 应用入口
 ├── requirements.txt     # 依赖
-└── assets/              # 静态资源
+├── assets/              # 静态资源
+├── config/              # 配置文件
+└── src/
+    ├── core/            # 核心模型与工具
+    ├── data/            # 数据访问层（API、缓存、配置）
+    ├── services/        # 业务服务层
+    └── ui/              # 用户界面层
 ```
 
-## 依赖
+## 开发特性
 
-| 依赖 | 版本 | 说明 |
-|------|------|------|
-| PySide6 | ≥6.4.0 | GUI 框架 |
-| PySide6-Fluent-Widgets | ≥1.5.0 | Fluent 风格组件 |
-| aiohttp | ≥3.9.0 | 异步 HTTP 客户端 |
-| pydantic | ≥2.0.0 | 数据验证 |
+- 日志分级（DEBUG/INFO/WARNING/ERROR），保存至 logs/
+- 模块化设计，便于开发测试
+- 可选集成便携版 VLC 播放器
 
-## 许可证
+## 开发流程
 
-GNU General Public License v3.0
+1. 在此目录进行功能开发
+2. 功能稳定后同步到 Release 版本（合并为单文件）
+
+## 打包
+
+通过 GitHub Actions 触发 PyInstaller.yml，选择 `build_type: Debug`

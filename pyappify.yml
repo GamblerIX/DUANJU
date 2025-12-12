@@ -1,8 +1,8 @@
 name: "DUANJU"
 profiles:
-  - name: "release"
+  - name: "debug"
     git_url: "https://github.com/GamblerIX/DUANJU.git"
-    main_script: "Release/main.py"
+    main_script: "Debug/main.py"
     requires_python: "3.10"
-    requirements: "Release/requirements.txt"
-    working_dir: "Release"
+    requirements: "Debug/requirements.txt"
+    working_dir: "Debug"
