@@ -659,33 +659,47 @@ GET https://api.cenguigui.cn/api/duanju/api.php?comments_id=7563872366422395966&
 
 ## Python 调用示例
 
-### 使用项目内置服务
+### 使用 aiohttp 调用
 
 ```python
-from src.data.api.api_client import ApiClient
-from src.services.search_service import SearchService
-from src.services.video_service import VideoService
-from src.services.category_service import CategoryService
-from src.data.cache.cache_manager import CacheManager
+import aiohttp
+import asyncio
 
-# 初始化
-api_client = ApiClient()
-cache = CacheManager()
+BASE_URL = "https://api.cenguigui.cn/api/duanju/api.php"
 
-# 搜索服务
-search_service = SearchService(api_client, cache)
-search_service.search("总裁", page=1)
+async def search_drama(keyword: str, page: int = 1):
+    async with aiohttp.ClientSession() as session:
+        params = {"name": keyword, "page": page}
+        async with session.get(BASE_URL, params=params) as response:
+            return await response.json()
 
-# 视频服务
-video_service = VideoService(api_client)
-video_service.fetch_episodes("7416545333695499326")
-video_service.fetch_video_url("7416589528229497881", quality="1080p")
+async def get_episodes(book_id: str):
+    async with aiohttp.ClientSession() as session:
+        params = {"book_id": book_id}
+        async with session.get(BASE_URL, params=params) as response:
+            return await response.json()
 
-# 分类服务
-category_service = CategoryService(api_client, cache)
-category_service.fetch_categories()
-category_service.fetch_category_dramas("穿越", offset=1)
-category_service.fetch_recommendations()
+async def get_video_url(video_id: str, level: str = "1080p"):
+    async with aiohttp.ClientSession() as session:
+        params = {"video_id": video_id, "level": level, "type": "json"}
+        async with session.get(BASE_URL, params=params) as response:
+            return await response.json()
+
+# 使用示例
+async def main():
+    # 搜索短剧
+    result = await search_drama("总裁", page=1)
+    print(result)
+    
+    # 获取剧集列表
+    episodes = await get_episodes("7416545333695499326")
+    print(episodes)
+    
+    # 获取视频地址
+    video = await get_video_url("7416589528229497881", "1080p")
+    print(video)
+
+asyncio.run(main())
 ```
 
 ---

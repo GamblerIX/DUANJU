@@ -33,14 +33,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Release build
-        run: |
-          Copy-Item -Path "Release/pyappify.yml" -Destination "pyappify.yml" -Force
-          Copy-Item -Path "Release/main.py" -Destination "main.py" -Force
-          Copy-Item -Path "Release/requirements.txt" -Destination "requirements.txt" -Force
-          if (Test-Path "Release/src") { Copy-Item -Path "Release/src" -Destination "src" -Recurse -Force }
-          if (Test-Path "Release/assets") { Copy-Item -Path "Release/assets" -Destination "assets" -Recurse -Force }
-
       - name: Build with PyAppify
         uses: ok-oldking/pyappify-action@master
 
@@ -118,10 +110,8 @@ jobs:
             curl -sL https://gitee.com/GamblerIX/DUANJU/raw/main/Termux/install.sh | bash
             ```
 
-            ### Debug 版本
-            Debug 版本请自行从源码运行：
+            ### 源码运行
             ```bash
-            cd Debug
             pip install -r requirements.txt
             python main.py
             ```
