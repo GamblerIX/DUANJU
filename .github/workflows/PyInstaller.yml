@@ -1,0 +1,51 @@
+name: PyInstaller Build (Quick Test)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号 (如 1.0.0)'
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r Release/requirements.txt
+          pip install pyinstaller
+
+      - name: Build with PyInstaller
+        run: |
+          cd Release
+          pyinstaller --noconfirm --onefile --windowed `
+            --icon=../.github/workflows/favicon.ico `
+            --add-data "assets;assets" `
+            --name Duanju-${{ inputs.version }} `
+            --distpath ../dist `
+            main.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Duanju-PyInstaller-${{ inputs.version }}
+          path: dist/Duanju-${{ inputs.version }}.exe
+          retention-days: 14

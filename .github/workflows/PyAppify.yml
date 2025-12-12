@@ -1,0 +1,63 @@
+name: Build with PyAppify
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build Type'
+        required: true
+        type: choice
+        options:
+          - Debug
+          - Release
+          - Both
+        default: 'Release'
+
+jobs:
+  build-debug:
+    if: ${{ github.event.inputs.build_type == 'Debug' || github.event.inputs.build_type == 'Both' }}
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Debug build
+        run: |
+          Copy-Item -Path "Debug/pyappify.yml" -Destination "pyappify.yml" -Force
+          Copy-Item -Path "Debug/main.py" -Destination "main.py" -Force
+          Copy-Item -Path "Debug/requirements.txt" -Destination "requirements.txt" -Force
+          Copy-Item -Path "Debug/src" -Destination "src" -Recurse -Force
+          if (Test-Path "Debug/assets") { Copy-Item -Path "Debug/assets" -Destination "assets" -Recurse -Force }
+
+      - name: Build Debug with PyAppify
+        uses: ok-oldking/pyappify-action@master
+
+      - name: Upload Debug Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: DUANJU-Debug-pyappify
+          path: pyappify_dist/*
+
+  build-release:
+    if: ${{ github.event.inputs.build_type == 'Release' || github.event.inputs.build_type == 'Both' }}
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Release build
+        run: |
+          Copy-Item -Path "Release/pyappify.yml" -Destination "pyappify.yml" -Force
+          Copy-Item -Path "Release/main.py" -Destination "main.py" -Force
+          Copy-Item -Path "Release/requirements.txt" -Destination "requirements.txt" -Force
+          if (Test-Path "Release/src") { Copy-Item -Path "Release/src" -Destination "src" -Recurse -Force }
+          if (Test-Path "Release/assets") { Copy-Item -Path "Release/assets" -Destination "assets" -Recurse -Force }
+
+      - name: Build Release with PyAppify
+        uses: ok-oldking/pyappify-action@master
+
+      - name: Upload Release Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: DUANJU-Release-pyappify
+          path: pyappify_dist/*
