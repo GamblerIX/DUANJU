@@ -1,0 +1,535 @@
+/* 短剧 Termux Web 前端样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #e94560;
+    --bg-color: #1a1a2e;
+    --card-bg: #16213e;
+    --text-color: #eee;
+    --text-muted: #888;
+    --border-radius: 8px;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    line-height: 1.5;
+}
+
+/* 头部 */
+.header {
+    background: var(--card-bg);
+    padding: 12px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.logo {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.search-box {
+    flex: 1;
+    display: flex;
+    min-width: 200px;
+    max-width: 400px;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 10px 14px;
+    border: none;
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 14px;
+}
+
+.search-box input:focus {
+    outline: 2px solid var(--primary-color);
+}
+
+.search-box button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    background: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    transition: opacity 0.2s;
+}
+
+.search-box button:active {
+    opacity: 0.8;
+}
+
+
+/* 分类导航 */
+.categories {
+    background: var(--card-bg);
+    padding: 10px 16px;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+}
+
+.categories::-webkit-scrollbar {
+    display: none;
+}
+
+.category-btn {
+    display: inline-block;
+    padding: 6px 14px;
+    margin-right: 8px;
+    border: 1px solid var(--text-muted);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.category-btn.active,
+.category-btn:active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* 主内容区 */
+.main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px;
+    min-height: calc(100vh - 150px);
+}
+
+/* 短剧网格 - 响应式 */
+.drama-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 768px) {
+    .drama-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .drama-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+/* 短剧卡片 */
+.drama-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.drama-card:active {
+    transform: scale(0.98);
+}
+
+.drama-card .cover {
+    position: relative;
+    padding-top: 133%;
+    background: #0f0f23;
+}
+
+.drama-card .cover img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.drama-card .episode-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.7);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.drama-card .info {
+    padding: 10px;
+}
+
+.drama-card .title {
+    font-size: 14px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.drama-card .meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+
+/* 详情页 */
+.detail-page {
+    padding-bottom: 20px;
+}
+
+.detail-header {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.detail-cover {
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.detail-cover img {
+    width: 100%;
+    border-radius: var(--border-radius);
+}
+
+.detail-info h2 {
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.detail-info .meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.detail-info .desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 剧集列表 */
+.episode-section h3 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--text-muted);
+}
+
+.episode-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+
+@media (min-width: 768px) {
+    .episode-grid {
+        grid-template-columns: repeat(10, 1fr);
+    }
+}
+
+.episode-btn {
+    padding: 10px;
+    border: 1px solid var(--text-muted);
+    border-radius: var(--border-radius);
+    background: transparent;
+    color: var(--text-color);
+    font-size: 13px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.episode-btn:active,
+.episode-btn.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.episode-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.page-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--text-muted);
+    border-radius: var(--border-radius);
+    background: transparent;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.page-btn.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* 播放器模态框 */
+.player-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.95);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.player-modal.active {
+    display: flex;
+}
+
+.player-container {
+    width: 100%;
+    max-width: 900px;
+    padding: 16px;
+}
+
+.player-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    color: white;
+}
+
+.player-header span {
+    font-size: 16px;
+}
+
+.close-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+#video-player {
+    width: 100%;
+    max-height: 70vh;
+    background: black;
+    border-radius: var(--border-radius);
+}
+
+.player-controls {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.player-controls button {
+    padding: 10px 24px;
+    border: none;
+    border-radius: var(--border-radius);
+    background: var(--primary-color);
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.player-controls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.player-error {
+    display: none;
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+}
+
+.player-error.active {
+    display: block;
+}
+
+.player-error button {
+    margin-top: 16px;
+    padding: 10px 24px;
+    border: none;
+    border-radius: var(--border-radius);
+    background: var(--primary-color);
+    color: white;
+    cursor: pointer;
+}
+
+
+/* 加载动画 */
+.loading {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.loading.active {
+    display: block;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--card-bg);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 错误/空状态 */
+.error-message,
+.empty-message {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+}
+
+.error-message button {
+    margin-top: 16px;
+    padding: 10px 24px;
+    border: none;
+    border-radius: var(--border-radius);
+    background: var(--primary-color);
+    color: white;
+    cursor: pointer;
+}
+
+/* 区块标题 */
+.section-title {
+    font-size: 18px;
+    margin-bottom: 16px;
+    padding-left: 12px;
+    border-left: 3px solid var(--primary-color);
+}
+
+/* 返回按钮 */
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 0;
+    margin-bottom: 16px;
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* Toast 提示 */
+.toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    border-radius: var(--border-radius);
+    font-size: 14px;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.toast.active {
+    opacity: 1;
+}
+
+
+/* 播放器额外按钮 */
+.player-extra {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.player-extra button {
+    padding: 8px 16px;
+    border: 1px solid var(--text-muted);
+    border-radius: var(--border-radius);
+    background: transparent;
+    color: var(--text-color);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.player-extra button:active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.error-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.error-actions button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--border-radius);
+    background: var(--primary-color);
+    color: white;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.error-actions button:nth-child(2),
+.error-actions button:nth-child(3) {
+    background: var(--card-bg);
+    border: 1px solid var(--text-muted);
+}

@@ -1,53 +1,68 @@
-# DUANJU Release 版本
+# 短剧 Termux 版
 
-生产环境版本，代码合并为单文件，优化性能。
-
-## 快速开始
-
-### 方式一：直接运行
-
-从 [Releases](../../releases) 下载最新版本，双击运行。
-
-### 方式二：源码运行
-
-```bash
-pip install -r requirements.txt
-python main.py
-```
+在 Android 手机上通过 Termux 运行短剧服务端，使用浏览器观看。
 
 ## 功能
 
-- 🔍 短剧搜索与浏览
-- 📂 分类筛选与推荐
-- ▶️ VLC / 浏览器双播放模式
-- ⬇️ 视频下载
-- ⭐ 收藏夹管理
-- 📜 观看历史记录
-- 🎨 明暗主题切换
+- 🚀 一键安装
+- ⚡ 快捷指令 `dj` 启动
+- 🌐 浏览器访问，无需 APP
+- 📺 搜索、分类、播放
 
-## 系统要求
+## 安装
 
-- Windows 10/11
-- Python 3.10+（源码运行）
+### 一键安装
 
-## 目录结构
+```bash
+# Gitee
+pkg install -y curl && curl -sL https://gitee.com/GamblerIX/DUANJU/raw/main/Termux/install.sh | bash
 
-```
-Release/
-├── main.py              # 应用入口（单文件，含所有模块）
-├── requirements.txt     # 依赖
-└── assets/              # 静态资源
+# GitHub
+pkg install -y curl && curl -sL https://raw.githubusercontent.com/GamblerIX/DUANJU/main/Termux/install.sh | bash
 ```
 
-## 依赖
+### 手动安装
 
-| 依赖 | 版本 | 说明 |
-|------|------|------|
-| PySide6 | ≥6.4.0 | GUI 框架 |
-| PySide6-Fluent-Widgets | ≥1.5.0 | Fluent 风格组件 |
-| aiohttp | ≥3.9.0 | 异步 HTTP 客户端 |
-| pydantic | ≥2.0.0 | 数据验证 |
+```bash
+pkg update && pkg install -y python git
+git clone https://gitee.com/GamblerIX/DUANJU.git ~/duanju
+pip install flask requests
+echo "alias dj='cd ~/duanju/Termux && python server.py'" >> ~/.bashrc
+source ~/.bashrc
+```
 
-## 许可证
+## 使用
 
-GNU General Public License v3.0
+```bash
+# 启动服务
+dj
+
+# 或
+cd ~/duanju/Termux && python server.py
+```
+
+启动后在浏览器打开显示的地址（如 `http://192.168.1.100:8080`）。
+
+按 `Ctrl + C` 停止服务。
+
+## 配置
+
+编辑 `server.py` 修改：
+
+```python
+HOST = "0.0.0.0"      # 监听地址
+PORT = 8080           # 端口号
+REQUEST_TIMEOUT = 30  # API 超时(秒)
+```
+
+## 常见问题
+
+- 端口被占用：修改 `PORT` 变量
+- 无法访问：确保手机和浏览器在同一网络
+- 视频无法播放：部分视频有地区限制，尝试切换清晰度
+
+## 相关链接
+
+- [GitHub](https://github.com/GamblerIX/DUANJU)
+- [Gitee](https://gitee.com/GamblerIX/DUANJU)
+- [Termux](https://termux.dev/)

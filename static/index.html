@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>短剧 - Termux</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- 头部导航 -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo" onclick="Router.navigate('home')">短剧</h1>
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="搜索短剧...">
+                    <button id="search-btn" onclick="handleSearch()">搜索</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 分类导航 -->
+        <nav class="categories" id="categories-nav"></nav>
+
+        <!-- 主内容区 -->
+        <main class="main-content" id="main-content">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>加载中...</p>
+            </div>
+        </main>
+
+        <!-- 视频播放器模态框 -->
+        <div class="player-modal" id="player-modal">
+            <div class="player-container">
+                <div class="player-header">
+                    <span id="player-title"></span>
+                    <button class="close-btn" onclick="closePlayer()">×</button>
+                </div>
+                <video id="video-player" controls playsinline>
+                    您的浏览器不支持视频播放
+                </video>
+                <div class="player-controls">
+                    <button id="prev-episode" onclick="playPrevEpisode()">上一集</button>
+                    <button id="next-episode" onclick="playNextEpisode()">下一集</button>
+                </div>
+                <div class="player-error" id="player-error">
+                    <p id="error-msg">视频加载失败</p>
+                    <div class="error-actions">
+                        <button onclick="retryVideo()">重试</button>
+                    </div>
+                    <div class="error-actions external-actions" id="external-actions" style="display:none; margin-top:10px;">
+                        <button onclick="openExternal()">📱 外部播放</button>
+                        <button onclick="copyVideoUrl()">📋 复制链接</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/components.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
