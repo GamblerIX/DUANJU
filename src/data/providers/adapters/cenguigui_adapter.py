@@ -5,7 +5,9 @@
 """
 import re
 import json
+import time
 from typing import List
+from collections import deque
 import aiohttp
 import asyncio
 
@@ -31,6 +33,10 @@ class CenguiguiAdapter(BaseDataProvider):
     """Cenguigui API 数据提供者"""
     
     BASE_URL = "https://api.cenguigui.cn/api/duanju/api.php"
+    
+    # 限流配置：10秒内最多5次请求
+    RATE_LIMIT_WINDOW = 10.0  # 时间窗口（秒）
+    RATE_LIMIT_MAX_REQUESTS = 5  # 窗口内最大请求数
     
     # 静态分类列表
     CATEGORIES = [
@@ -59,13 +65,41 @@ class CenguiguiAdapter(BaseDataProvider):
                 available_qualities=["1080p", "720p", "360p"]
             )
         )
+        # 限流：滑动窗口记录请求时间戳
+        self._request_timestamps: deque = deque()
     
     @property
     def info(self) -> ProviderInfo:
         return self._info
     
+    async def _wait_for_rate_limit(self) -> None:
+        """等待直到满足限流条件（滑动窗口算法）"""
+        now = time.monotonic()
+        window_start = now - self.RATE_LIMIT_WINDOW
+        
+        # 清理过期的时间戳
+        while self._request_timestamps and self._request_timestamps[0] < window_start:
+            self._request_timestamps.popleft()
+        
+        # 如果窗口内请求数已达上限，等待最早的请求过期
+        if len(self._request_timestamps) >= self.RATE_LIMIT_MAX_REQUESTS:
+            wait_time = self._request_timestamps[0] - window_start
+            if wait_time > 0:
+                logger.debug(f"限流等待 {wait_time:.2f} 秒")
+                await asyncio.sleep(wait_time)
+                # 等待后重新清理
+                now = time.monotonic()
+                window_start = now - self.RATE_LIMIT_WINDOW
+                while self._request_timestamps and self._request_timestamps[0] < window_start:
+                    self._request_timestamps.popleft()
+        
+        # 记录本次请求时间
+        self._request_timestamps.append(time.monotonic())
+    
     async def _request(self, params: dict) -> str:
-        """发送 HTTP 请求"""
+        """发送 HTTP 请求（带限流）"""
+        await self._wait_for_rate_limit()
+        
         timeout = aiohttp.ClientTimeout(total=self._timeout / 1000)
         connector = aiohttp.TCPConnector(force_close=True)
         
