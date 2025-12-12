@@ -12,11 +12,12 @@ python main.py
 ## 目录结构
 
 ```
-Debug/
+DUANJU/
 ├── main.py              # 应用入口
 ├── requirements.txt     # 依赖
+├── pyappify.yml         # PyAppify 打包配置
 ├── assets/              # 静态资源
-├── config/              # 配置文件
+├── docs/                # 开发文档
 └── src/
     ├── core/            # 核心模型与工具
     ├── data/            # 数据访问层（API、缓存、配置）
@@ -32,9 +33,5 @@ Debug/
 
 ## 开发流程
 
-1. 在此目录进行功能开发
-2. 功能稳定后同步到 Release 版本（合并为单文件）
-
-## 打包
-
-通过 GitHub Actions 触发 PyInstaller.yml，选择 `build_type: Debug`
+1. 在此分支进行功能开发
+2. 功能稳定后合并到 main 分支（代码合并为单文件）
