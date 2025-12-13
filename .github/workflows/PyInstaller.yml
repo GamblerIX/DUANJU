@@ -38,7 +38,7 @@ jobs:
           pyinstaller --noconfirm --onefile --windowed `
             --icon=icon.ico `
             --add-data "assets;assets" `
-            --name Duanju-${{ inputs.version }} `
+            --name Duanju-PyInstaller-${{ inputs.version }} `
             --distpath dist `
             main.py
 
@@ -46,5 +46,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Duanju-PyInstaller-${{ inputs.version }}
-          path: dist/Duanju-${{ inputs.version }}.exe
+          path: dist/Duanju-PyInstaller-${{ inputs.version }}.exe
           retention-days: 14

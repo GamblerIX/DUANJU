@@ -42,11 +42,15 @@ jobs:
       - name: Build with PyAppify
         uses: ok-oldking/pyappify-action@master
 
+      - name: Rename PyAppify output
+        run: |
+          Move-Item -Path "pyappify_dist/*-release-setup.exe" -Destination "pyappify_dist/Duanju-PyAppify-${{ inputs.version }}.exe"
+
       - name: Upload PyAppify Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: DUANJU-PyAppify-${{ inputs.version }}
-          path: pyappify_dist/*-release-setup.exe
+          name: Duanju-PyAppify-${{ inputs.version }}
+          path: pyappify_dist/Duanju-PyAppify-${{ inputs.version }}.exe
 
   build-nuitka:
     if: inputs.build_nuitka
@@ -70,7 +74,7 @@ jobs:
         if: inputs.build_pyappify && needs.build-pyappify.result == 'success'
         uses: actions/download-artifact@v4
         with:
-          name: DUANJU-PyAppify-${{ inputs.version }}
+          name: Duanju-PyAppify-${{ inputs.version }}
           path: dist/pyappify
 
       - name: Download Nuitka artifact

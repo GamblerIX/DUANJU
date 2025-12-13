@@ -40,7 +40,7 @@ jobs:
             --windows-icon-from-ico=icon.ico `
             --enable-plugin=pyside6 `
             --include-data-dir=assets=assets `
-            --output-filename=Duanju-${{ inputs.version }}.exe `
+            --output-filename=Duanju-Nuitka-${{ inputs.version }}.exe `
             --output-dir=dist `
             --assume-yes-for-downloads `
             main.py
@@ -49,5 +49,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Duanju-Nuitka-${{ inputs.version }}
-          path: dist/Duanju-${{ inputs.version }}.exe
+          path: dist/Duanju-Nuitka-${{ inputs.version }}.exe
           retention-days: 30
