@@ -18,7 +18,7 @@ NC='\033[0m'
 # 安装目录
 INSTALL_DIR="$HOME/duanju"
 REPO_URL="https://gitee.com/GamblerIX/DUANJU.git"
-BRANCH="termux"
+BRANCH="Termux"
 
 print_status() {
     echo -e "${GREEN}[✓]${NC} $1"
