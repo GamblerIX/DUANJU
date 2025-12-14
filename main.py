@@ -18,6 +18,19 @@ from enum import Enum
 if 'PATH' not in os.environ:
     os.environ['PATH'] = ''
 
+
+def get_base_path() -> str:
+    """获取应用程序基础路径，兼容打包和开发环境"""
+    if getattr(sys, 'frozen', False):
+        # PyInstaller/PyAppify 打包后
+        return os.path.dirname(sys.executable)
+    else:
+        # 开发环境
+        return os.path.dirname(os.path.abspath(__file__))
+
+
+BASE_PATH = get_base_path()
+
 from PySide6.QtCore import (
     Qt, QObject, Signal, QTimer, QThread, QUrl
 )
@@ -535,7 +548,7 @@ def deserialize_drama(data: Dict[str, Any]) -> DramaInfo:
 
 
 class ConfigManager:
-    DEFAULT_CONFIG_PATH = "config/config.json"
+    DEFAULT_CONFIG_PATH = os.path.join(BASE_PATH, "config", "config.json")
 
     def __init__(self, config_path: Optional[str] = None):
         self._config_path = Path(config_path or self.DEFAULT_CONFIG_PATH)
@@ -619,7 +632,7 @@ class ConfigManager:
 
 
 class FavoritesManager:
-    DEFAULT_PATH = "data/favorites.json"
+    DEFAULT_PATH = os.path.join(BASE_PATH, "data", "favorites.json")
 
     def __init__(self, file_path: Optional[str] = None):
         self._file_path = Path(file_path or self.DEFAULT_PATH)
@@ -676,7 +689,7 @@ class FavoritesManager:
 
 
 class HistoryManager:
-    DEFAULT_PATH = "data/history.json"
+    DEFAULT_PATH = os.path.join(BASE_PATH, "data", "history.json")
     MAX_HISTORY = 100
 
     def __init__(self, file_path: Optional[str] = None, max_items: int = MAX_HISTORY):
@@ -739,7 +752,7 @@ class HistoryManager:
 class ImageLoader(QObject):
     image_loaded = Signal(str, QPixmap)
     image_failed = Signal(str, str)
-    CACHE_DIR = "cache/images"
+    CACHE_DIR = os.path.join(BASE_PATH, "cache", "images")
     MEMORY_CACHE_SIZE = 50
 
     def __init__(self, parent: Optional[QObject] = None):
@@ -2301,7 +2314,7 @@ class PlayerWindow(QWidget):
     episode_changed = Signal(object)
     closed = Signal()
     select_episode_requested = Signal()
-    LOCAL_VLC_PATH = os.path.join(os.path.dirname(__file__), "vlc", "vlc.exe")
+    LOCAL_VLC_PATH = os.path.join(BASE_PATH, "vlc", "vlc.exe")
     SYSTEM_VLC_PATHS = [r"C:\Program Files\VideoLAN\VLC\vlc.exe", r"C:\Program Files (x86)\VideoLAN\VLC\vlc.exe"]
 
     def __init__(self, drama: DramaInfo, episode: EpisodeInfo, video_url: str, episodes: Optional[List[EpisodeInfo]] = None, parent: Optional[QWidget] = None):
@@ -2494,7 +2507,7 @@ class MainWindow(FluentWindow):
         self._search_service = SearchService(self._api_client, self._cache, self)
         self._video_service = VideoService(self._api_client, self)
         self._category_service = CategoryService(self._api_client, self._cache, self)
-        download_dir = os.path.join(os.path.dirname(__file__), "downloads")
+        download_dir = os.path.join(BASE_PATH, "downloads")
         self._download_service = DownloadService(self._api_client, download_dir, self._config.default_quality, self)
         self._favorites: set = set()
         self._player_window = None
@@ -2514,7 +2527,7 @@ class MainWindow(FluentWindow):
         self.addSubInterface(self._download_interface, FluentIcon.DOWNLOAD, "下载", NavigationItemPosition.TOP)
         self.navigationInterface.addSeparator()
         self.navigationInterface.addItem(routeKey="github", icon=FluentIcon.GITHUB, text="GitHub", onClick=lambda: QDesktopServices.openUrl(QUrl("https://github.com/GamblerIX/DUANJU")), position=NavigationItemPosition.BOTTOM)
-        gitee_icon_path = os.path.join(os.path.dirname(__file__), "assets", "gitee.ico")
+        gitee_icon_path = os.path.join(BASE_PATH, "assets", "gitee.ico")
         if os.path.exists(gitee_icon_path):
             self.navigationInterface.addItem(routeKey="gitee", icon=QIcon(gitee_icon_path), text="Gitee", onClick=lambda: QDesktopServices.openUrl(QUrl("https://gitee.com/GamblerIX/DUANJU")), position=NavigationItemPosition.BOTTOM)
         self.navigationInterface.addItem(routeKey="settings", icon=FluentIcon.SETTING, text="设置", onClick=self._show_settings, position=NavigationItemPosition.BOTTOM)
