@@ -183,3 +183,4 @@ cython_debug/
 cache/
 logs/
 config.json
+CLAUDE.md
