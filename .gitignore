@@ -183,6 +183,4 @@ cython_debug/
 cache/
 logs/
 config.json
-.gitignore
 CLAUDE.md
-docs/DUANJU_代码深度审查报告.md
