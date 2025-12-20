@@ -1,0 +1,19 @@
+[run]
+source = src
+omit = 
+    src/ui/*
+    src/ui/**/*
+    */__pycache__/*
+    */test/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    @abstractmethod
+
+show_missing = True
+precision = 0

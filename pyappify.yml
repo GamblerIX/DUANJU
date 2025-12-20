@@ -1,9 +1,0 @@
-name: "DUANJU"
-icon: "icon.ico"
-profiles:
-  - name: "release"
-    git_url: "https://github.com/GamblerIX/DUANJU.git"
-    main_script: "main.py"
-    requires_python: "3.10"
-    requirements: "requirements.txt"
-    working_dir: "."

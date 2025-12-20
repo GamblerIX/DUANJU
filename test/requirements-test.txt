@@ -1,0 +1,16 @@
+# 测试依赖
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0
+pytest-timeout>=2.1.0
+
+# 代码质量
+flake8>=6.0.0
+mypy>=1.0.0
+black>=23.0.0
+
+# 测试报告
+pytest-html>=3.2.0
+pytest-json-report>=1.5.0
+
