@@ -1,0 +1,10 @@
+apps:
+  - name: "DuanjuApp"
+    repository: "https://github.com/GamblerIX/DUANJU.git"
+    description: "沉浸式短剧播放器"
+    profiles:
+      - name: "Default"
+        python_version: "3.12.0"
+        requirements: "requirements.txt"
+        # 启动命令，相对于项目根目录
+        entry_point: "python main.py"
