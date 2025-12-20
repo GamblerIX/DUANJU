@@ -9,8 +9,23 @@ permissions:
   contents: write
 
 jobs:
-  build-assets:
-    name: Build Assets
+  test:
+    name: Pre-release Tests
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-qt pytest-cov
+      - run: pytest test/
+
+  build-core:
+    name: Build Core Apps
+    needs: test
     runs-on: windows-latest
     strategy:
       matrix:
@@ -19,22 +34,17 @@ jobs:
             name: PyInstaller
           - method: nuitka
             name: Nuitka
-          - method: pyappify
-            name: PyAppify
 
     steps:
       - uses: actions/checkout@v4
       
-      # Common Setup for Python (PyInstaller & Nuitka)
       - name: Set up Python
-        if: matrix.method != 'pyappify'
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: 'pip'
           
       - name: Install Dependencies
-        if: matrix.method != 'pyappify'
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
@@ -45,7 +55,6 @@ jobs:
         run: |
           pip install pyinstaller
           pyinstaller --noconfirm --onedir --windowed --name "DuanjuApp" --add-data "src;src" --add-data "assets;assets" --icon "assets/icon.ico" main.py
-          # Zip the output for release
           Compress-Archive -Path dist/DuanjuApp -DestinationPath dist/DuanjuApp-PyInstaller.zip
 
       # Nuitka Build
@@ -54,46 +63,71 @@ jobs:
         run: |
           pip install nuitka zstandard
           python -m nuitka --standalone --windowed --enable-plugin=pyside6 --include-data-dir=src=src --include-data-dir=assets=assets --include-package=src --output-dir=dist --output-filename=DuanjuApp.exe --main=main.py
-          # Zip the output
           Compress-Archive -Path dist/DuanjuApp.dist -DestinationPath dist/DuanjuApp-Nuitka.zip
 
-      # PyAppify Build
-      - name: Build with PyAppify
-        if: matrix.method == 'pyappify'
-        shell: powershell
-        run: |
-          # Checkout PyAppify Tool
-          git clone https://github.com/ok-oldking/pyappify.git pyappify_tool
-          
-          # Setup Node & Rust
-          # Note: GitHub Actions runners have Node and Rust pre-installed, but we ensure specific versions/targets
-          rustup target add x86_64-pc-windows-msvc
-          
-          # Install pnpm
-          npm install -g pnpm@9
-          
-          # Configure
-          Copy-Item -Path "pyappify.yml" -Destination "pyappify_tool/src-tauri/assets/pyappify.yml" -Force
-          
-          # Build
-          cd pyappify_tool
-          pnpm install
-          pnpm tauri build
-          
-          # Move artifact
-          New-Item -ItemType Directory -Force -Path ../dist
-          Move-Item -Path "src-tauri/target/release/bundle/nsis/*.exe" -Destination "../dist/DuanjuApp-Setup.exe"
-
-      # Upload Artifacts for Release Job
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: release-artifacts-${{ matrix.method }}
-          path: dist/*.*
+          name: release-${{ matrix.method }}
+          path: dist/*.zip
+
+  build-launcher:
+    name: Build PyAppify Launcher
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - name: Checkout DUANJU
+        uses: actions/checkout@v4
+        with:
+          path: duanju
+          
+      - name: Checkout PyAppify Tool
+        uses: actions/checkout@v4
+        with:
+          repository: ok-oldking/pyappify
+          path: pyappify
+          
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+          
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+          
+      - name: Configure PyAppify
+        shell: powershell
+        run: |
+          Copy-Item -Path "duanju/pyappify.yml" -Destination "pyappify/src-tauri/assets/pyappify.yml" -Force
+          
+      - name: Build Launcher
+        working-directory: pyappify
+        run: |
+          pnpm install
+          pnpm tauri build
+          
+      - name: Prepare Artifact
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path dist
+          Move-Item -Path "pyappify/src-tauri/target/release/bundle/nsis/*.exe" -Destination "dist/DuanjuApp-Setup.exe"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-pyappify
+          path: dist/DuanjuApp-Setup.exe
 
   create-release:
     name: Create Release
-    needs: build-assets
+    needs: [build-core, build-launcher]
     runs-on: ubuntu-latest
     steps:
       - name: Download All Artifacts
@@ -105,7 +139,9 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/*
+          files: |
+            artifacts/*.zip
+            artifacts/*.exe
           draft: false
           prerelease: false
           generate_release_notes: true

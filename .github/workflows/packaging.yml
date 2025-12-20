@@ -13,8 +13,8 @@ on:
         default: 'v1.0.0'
 
 jobs:
-  package-pyinstaller:
-    name: Build with PyInstaller
+  test:
+    name: Run Tests
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,50 +29,70 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pyinstaller
+          pip install pytest pytest-asyncio pytest-qt pytest-cov
           
-      - name: Build EXE
+      - name: Run Tests
         run: |
-          # 包含 src 和 assets 目录
+          pytest test/
+
+  build-core:
+    name: Build Core Apps
+    needs: test
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - method: pyinstaller
+            name: PyInstaller
+          - method: nuitka
+            name: Nuitka
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # PyInstaller Specifics
+      - name: Build with PyInstaller
+        if: matrix.method == 'pyinstaller'
+        run: |
+          pip install pyinstaller
           pyinstaller --noconfirm --onedir --windowed --name "DuanjuApp" --add-data "src;src" --add-data "assets;assets" --icon "assets/icon.ico" main.py
           
-      - name: Upload Artifact
+      - name: Upload PyInstaller Artifact
+        if: matrix.method == 'pyinstaller'
         uses: actions/upload-artifact@v4
         with:
           name: DuanjuApp-PyInstaller
           path: dist/DuanjuApp
 
-  package-nuitka:
-    name: Build with Nuitka
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          cache: 'pip'
-          
-      - name: Install dependencies
+      # Nuitka Specifics
+      - name: Build with Nuitka
+        if: matrix.method == 'nuitka'
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
           pip install nuitka zstandard
-          
-      - name: Build EXE
-        run: |
-          # Nuitka 编译命令
           python -m nuitka --standalone --windowed --enable-plugin=pyside6 --include-data-dir=src=src --include-data-dir=assets=assets --include-package=src --output-dir=dist --output-filename=DuanjuApp.exe --main=main.py
           
-      - name: Upload Artifact
+      - name: Upload Nuitka Artifact
+        if: matrix.method == 'nuitka'
         uses: actions/upload-artifact@v4
         with:
           name: DuanjuApp-Nuitka
           path: dist/DuanjuApp.dist
 
-  package-pyappify:
+  build-launcher:
     name: Build PyAppify Launcher
+    needs: test
     runs-on: windows-latest
     steps:
       - name: Checkout DUANJU
@@ -104,7 +124,6 @@ jobs:
       - name: Configure PyAppify
         shell: powershell
         run: |
-          # 将当前项目的配置文件复制到 PyAppify 构建目录
           Copy-Item -Path "duanju/pyappify.yml" -Destination "pyappify/src-tauri/assets/pyappify.yml" -Force
           
       - name: Build Launcher
@@ -113,7 +132,7 @@ jobs:
           pnpm install
           pnpm tauri build
           
-      - name: Upload Artifact
+      - name: Upload Launcher Artifact
         uses: actions/upload-artifact@v4
         with:
           name: DuanjuApp-PyAppify-Launcher
