@@ -45,8 +45,8 @@ jobs:
         include:
           - method: pyinstaller
             name: PyInstaller
-          - method: nuitka
-            name: Nuitka
+          # - method: nuitka
+          #   name: Nuitka
 
     steps:
       - uses: actions/checkout@v4
