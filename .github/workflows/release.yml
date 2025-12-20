@@ -62,7 +62,7 @@ jobs:
         if: matrix.method == 'nuitka'
         run: |
           pip install nuitka zstandard
-          python -m nuitka --standalone --windows-console-mode=disable --enable-plugin=pyside6 --include-data-dir=src=src --include-data-dir=assets=assets --include-package=src --output-dir=dist --output-filename=DuanjuApp.exe --main=main.py
+          python -m nuitka --standalone --windows-console-mode=disable --enable-plugin=pyside6 --include-data-dir=assets=assets --include-package=src --output-dir=dist --output-filename=DuanjuApp.exe --main=main.py
           Compress-Archive -Path dist/DuanjuApp.dist -DestinationPath dist/DuanjuApp-Nuitka.zip
 
       - name: Upload Artifact
