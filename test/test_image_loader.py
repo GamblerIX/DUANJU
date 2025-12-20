@@ -811,7 +811,7 @@ class TestImageLoaderSingleton:
     @patch('src.data.image_loader.Path.mkdir')
     def test_singleton_instance(self, mock_mkdir, mock_network_manager):
         """测试单例实例"""
-        from src.data.image import image_loader
+        from src.data import image_loader
         
         # image_loader 模块应该有一个 image_loader 实例
         assert hasattr(image_loader, 'image_loader')
