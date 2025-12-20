@@ -157,7 +157,7 @@ class TestErrorHandling:
         ]
         
         for error, expected_keyword in test_cases:
-            msg = logger._get_friendly_error_message(error)
+            msg = logger.get_friendly_error_message(error)
             # 验证返回了某种消息
             assert len(msg) > 0
 
