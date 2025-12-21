@@ -60,10 +60,17 @@ jobs:
       # Nuitka Build
       - name: Build with Nuitka
         if: matrix.method == 'nuitka'
+        shell: powershell
         run: |
           pip install nuitka zstandard
-          python -m nuitka --standalone --windows-console-mode=disable --enable-plugin=pyside6 --include-data-dir=assets=assets --include-package=src --output-dir=dist --output-filename=DuanjuApp.exe --main=main.py
-          Compress-Archive -Path dist/DuanjuApp.dist -DestinationPath dist/DuanjuApp-Nuitka.zip
+          python -m nuitka --standalone --assume-yes-for-downloads --windows-console-mode=disable --enable-plugin=pyside6 --include-data-dir=assets=assets --include-package=src --output-dir=dist --output-filename=DuanjuApp.exe main.py
+          
+          # 验证构建输出目录存在
+          if (!(Test-Path 'dist/main.dist')) {
+            Write-Error "Build output directory 'dist/main.dist' not found. Nuitka build step likely failed."
+            exit 1
+          }
+          Compress-Archive -Path dist/main.dist -DestinationPath dist/DuanjuApp-Nuitka.zip
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
