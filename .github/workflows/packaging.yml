@@ -108,4 +108,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: DuanjuApp-PyAppify-Launcher
-          path: ${{ steps.pyappify.outputs.artifact-path }}
+          path: pyappify_dist/*

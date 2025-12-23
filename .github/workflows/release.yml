@@ -142,12 +142,12 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path dist
           # 查找并移动生成的安装包
-          $artifacts = Get-ChildItem -Path "${{ steps.pyappify.outputs.artifact-path }}" -Filter "*.exe" -Recurse
+          $artifacts = Get-ChildItem -Path "pyappify_dist" -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue
           if ($artifacts) {
             Copy-Item -Path $artifacts[0].FullName -Destination "dist/DuanjuApp-Setup.exe"
           } else {
             # 备用：查找 zip 文件
-            $zips = Get-ChildItem -Path "${{ steps.pyappify.outputs.artifact-path }}" -Filter "*.zip" -Recurse
+            $zips = Get-ChildItem -Path "pyappify_dist" -Filter "*.zip" -Recurse -ErrorAction SilentlyContinue
             if ($zips) {
               Copy-Item -Path $zips[0].FullName -Destination "dist/DuanjuApp-Launcher.zip"
             }
@@ -157,7 +157,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-pyappify
-          path: dist/*
+          path: pyappify_dist/*
 
   create-release:
     name: Create Release
