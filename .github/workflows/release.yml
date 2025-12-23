@@ -1,16 +1,61 @@
 name: Release Build
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号 (例如: v1.0.0)'
+        required: true
+        type: string
+      release_notes:
+        description: '发布说明'
+        required: false
+        type: string
+        default: ''
 
 permissions:
   contents: write
 
 jobs:
+  prepare:
+    name: Prepare Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Validate Version Format
+        id: version
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Version must be in format vX.Y.Z (e.g., v1.0.0)"
+            exit 1
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+      - name: Delete Existing Release and Tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          
+          # 删除已存在的 Release
+          if gh release view "$VERSION" &>/dev/null; then
+            echo "Deleting existing release: $VERSION"
+            gh release delete "$VERSION" --yes
+          fi
+          
+          # 删除已存在的 Tag
+          if git ls-remote --tags origin | grep -q "refs/tags/$VERSION"; then
+            echo "Deleting existing tag: $VERSION"
+            git push origin --delete "$VERSION" || true
+          fi
+
   test:
     name: Pre-release Tests
+    needs: prepare
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,7 +70,7 @@ jobs:
 
   build-core:
     name: Build Core Apps
-    needs: test
+    needs: [prepare, test]
     runs-on: windows-latest
     strategy:
       matrix:
@@ -80,7 +125,7 @@ jobs:
 
   build-launcher:
     name: Build PyAppify Launcher
-    needs: test
+    needs: [prepare, test]
     runs-on: windows-latest
     steps:
       - name: Checkout DUANJU
@@ -134,21 +179,33 @@ jobs:
 
   create-release:
     name: Create Release
-    needs: [build-core, build-launcher]
+    needs: [prepare, build-core, build-launcher]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
           merge-multiple: true
 
+      - name: Create Tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ needs.prepare.outputs.version }}
+          git push origin ${{ needs.prepare.outputs.version }}
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ needs.prepare.outputs.version }}
+          name: ${{ needs.prepare.outputs.version }}
+          body: ${{ github.event.inputs.release_notes }}
           files: |
             artifacts/*.zip
             artifacts/*.exe
           draft: false
           prerelease: false
-          generate_release_notes: true
+          generate_release_notes: ${{ github.event.inputs.release_notes == '' }}
