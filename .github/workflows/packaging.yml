@@ -67,7 +67,7 @@ jobs:
         if: matrix.method == 'pyinstaller'
         run: |
           pip install pyinstaller
-          pyinstaller --noconfirm --onedir --windowed --name "DuanjuApp" --add-data "src;src" --add-data "assets;assets" --icon "assets/icon.ico" main.py
+          pyinstaller --noconfirm --onedir --windowed --name "DuanjuApp" --add-data "src;src" --add-data "icons;icons" --icon "icons/icon.ico" main.py
           
       - name: Upload PyInstaller Artifact
         if: matrix.method == 'pyinstaller'
@@ -81,7 +81,7 @@ jobs:
         if: matrix.method == 'nuitka'
         run: |
           pip install nuitka zstandard
-          python -m nuitka --standalone --assume-yes-for-downloads --windows-console-mode=disable --enable-plugin=pyside6 --include-data-dir=assets=assets --include-package=src --output-dir=dist --output-filename=DuanjuApp.exe main.py
+          python -m nuitka --standalone --assume-yes-for-downloads --windows-console-mode=disable --enable-plugin=pyside6 --include-data-dir=icons=icons --include-package=src --output-dir=dist --output-filename=DuanjuApp.exe main.py
           
       - name: Upload Nuitka Artifact
         if: matrix.method == 'nuitka'
@@ -95,45 +95,17 @@ jobs:
     needs: test
     runs-on: windows-latest
     steps:
-      - name: Checkout DUANJU
+      - name: Checkout Repository
         uses: actions/checkout@v4
+          
+      - name: Build with PyAppify Action
+        id: pyappify
+        uses: ok-oldking/pyappify-action@master
         with:
-          path: duanju
-          
-      - name: Checkout PyAppify Tool
-        uses: actions/checkout@v4
-        with:
-          repository: ok-oldking/pyappify
-          path: pyappify
-          
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: x86_64-pc-windows-msvc
-          
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9
-          
-      - name: Configure PyAppify
-        shell: powershell
-        run: |
-          Copy-Item -Path "duanju/pyappify.yml" -Destination "pyappify/src-tauri/assets/pyappify.yml" -Force
-          
-      - name: Build Launcher
-        working-directory: pyappify
-        run: |
-          pnpm install
-          pnpm tauri build
+          version: v1.0.38
           
       - name: Upload Launcher Artifact
         uses: actions/upload-artifact@v4
         with:
           name: DuanjuApp-PyAppify-Launcher
-          path: pyappify/src-tauri/target/release/bundle/nsis/*.exe
+          path: ${{ steps.pyappify.outputs.artifact-path }}

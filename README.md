@@ -1,7 +1,7 @@
 # DuanjuApp (沉浸式短剧播放器)
 
 <p align="center">
-  <img src="assets/icon.ico" alt="Logo" width="128" height="128">
+  <img src="icons/icon.ico" alt="Logo" width="128" height="128">
 </p>
 
 DuanjuApp 是一个基于 Python (PySide6) 开发的现代化桌面端短剧播放器。它聚合了多个短剧源，提供沉浸式的观看体验、历史记录管理和收藏功能。

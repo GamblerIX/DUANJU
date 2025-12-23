@@ -101,7 +101,7 @@ class MainWindow(FluentWindow):
             position=NavigationItemPosition.BOTTOM
         )
         
-        gitee_icon_path = get_resource_path("assets/gitee.ico")
+        gitee_icon_path = get_resource_path("icons/gitee.ico")
         self.navigationInterface.addItem(
             routeKey="gitee", icon=QIcon(gitee_icon_path), text="Gitee",
             onClick=lambda: QDesktopServices.openUrl(QUrl("https://gitee.com/GamblerIX/DUANJU")),
