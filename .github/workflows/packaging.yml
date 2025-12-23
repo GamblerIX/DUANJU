@@ -100,7 +100,7 @@ jobs:
           
       - name: Build with PyAppify Action
         id: pyappify
-        uses: ok-oldking/pyappify-action@master
+        uses: ok-oldking/pyappify-action@v1.0.19
         with:
           version: v1.0.38
           
