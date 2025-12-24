@@ -4,14 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: '版本号 (例如: v1.0.0)'
+        description: '版本号 (例如: v1.0.0)，将自动从 docs/Changelog/{version}.md 读取发布说明'
         required: true
         type: string
-      release_notes:
-        description: '发布说明'
-        required: false
-        type: string
-        default: ''
 
 permissions:
   contents: write
@@ -172,6 +167,22 @@ jobs:
           path: artifacts
           merge-multiple: true
 
+      - name: Read Release Notes
+        id: release_notes
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          CHANGELOG_FILE="docs/Changelog/${VERSION}.md"
+          
+          if [ -f "$CHANGELOG_FILE" ]; then
+            echo "Found changelog file: $CHANGELOG_FILE"
+            cp "$CHANGELOG_FILE" artifacts/release-notes.md
+          else
+            echo "Warning: Changelog file not found at $CHANGELOG_FILE"
+            echo "# ${VERSION}" > artifacts/release-notes.md
+            echo "" >> artifacts/release-notes.md
+            echo "Release ${VERSION}" >> artifacts/release-notes.md
+          fi
+
       - name: Create Tag
         run: |
           git config user.name "github-actions[bot]"
@@ -184,10 +195,9 @@ jobs:
         with:
           tag_name: ${{ needs.prepare.outputs.version }}
           name: ${{ needs.prepare.outputs.version }}
-          body: ${{ github.event.inputs.release_notes }}
+          body_path: artifacts/release-notes.md
           files: |
             artifacts/*.zip
             artifacts/*.exe
           draft: false
           prerelease: false
-          generate_release_notes: ${{ github.event.inputs.release_notes == '' }}
