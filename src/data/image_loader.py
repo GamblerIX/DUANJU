@@ -6,6 +6,21 @@ from PySide6.QtCore import QObject, Signal, QUrl
 from PySide6.QtGui import QPixmap, QImage
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 
+from ..utils.resource_utils import get_app_path
+
+
+def _get_image_cache_dir() -> Path:
+    """获取图片缓存目录"""
+    cache_dir = Path(get_app_path("cache")) / "images"
+    try:
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        return cache_dir
+    except (PermissionError, OSError):
+        # 回退到用户目录
+        user_cache_dir = Path.home() / ".duanjuapp" / "cache" / "images"
+        user_cache_dir.mkdir(parents=True, exist_ok=True)
+        return user_cache_dir
+
 
 class ImageLoader(QObject):
     """异步图片加载器 - 支持内存缓存和磁盘缓存"""
@@ -13,7 +28,6 @@ class ImageLoader(QObject):
     image_loaded = Signal(str, QPixmap)
     image_failed = Signal(str, str)
     
-    CACHE_DIR = "cache/images"
     MAX_CACHE_SIZE = 100 * 1024 * 1024
     MEMORY_CACHE_SIZE = 50
     
@@ -21,8 +35,7 @@ class ImageLoader(QObject):
         super().__init__(parent)
         self._memory_cache: Dict[str, QPixmap] = {}
         self._cache_order: list = []
-        self._cache_dir = Path(self.CACHE_DIR)
-        self._cache_dir.mkdir(parents=True, exist_ok=True)
+        self._cache_dir = _get_image_cache_dir()
         self._loading: set = set()
         self._pending_callbacks: Dict[str, list] = {}
         

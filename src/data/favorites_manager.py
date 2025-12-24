@@ -6,15 +6,26 @@ from typing import List, Optional, Set
 
 from ..core.models import DramaInfo, FavoriteItem
 from ..utils.json_serializer import serialize_drama, deserialize_drama
+from ..utils.resource_utils import get_app_path
+
+
+def _get_favorites_path() -> Path:
+    """获取收藏文件路径"""
+    data_dir = Path(get_app_path("data"))
+    try:
+        data_dir.mkdir(parents=True, exist_ok=True)
+        return data_dir / "favorites.json"
+    except (PermissionError, OSError):
+        user_data_dir = Path.home() / ".duanjuapp" / "data"
+        user_data_dir.mkdir(parents=True, exist_ok=True)
+        return user_data_dir / "favorites.json"
 
 
 class FavoritesManager:
     """收藏管理器 - 管理用户收藏的短剧，支持 JSON 持久化"""
     
-    DEFAULT_PATH = "data/favorites.json"
-    
     def __init__(self, file_path: Optional[str] = None):
-        self._file_path = Path(file_path or self.DEFAULT_PATH)
+        self._file_path = Path(file_path) if file_path else _get_favorites_path()
         self._favorites: List[FavoriteItem] = []
         self._load()
     

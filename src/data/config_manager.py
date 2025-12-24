@@ -1,11 +1,13 @@
 """配置管理器实现"""
 import json
+import os
 from pathlib import Path
 from typing import List, Optional, Any
 from enum import Enum
 
 from ..core.models import AppConfig, ThemeMode
 from ..utils.json_serializer import serialize_config, deserialize_config
+from ..utils.resource_utils import get_app_path
 
 
 class QualityOption(Enum):
@@ -15,15 +17,34 @@ class QualityOption(Enum):
     Q1080P = "1080p"
 
 
+def _get_config_path() -> Path:
+    """获取配置文件路径，适配不同运行环境"""
+    # 使用 get_app_path 获取应用目录下的配置路径
+    config_dir = get_app_path("config")
+    config_path = Path(config_dir) / "config.json"
+    
+    # 确保目录存在
+    try:
+        Path(config_dir).mkdir(parents=True, exist_ok=True)
+        return config_path
+    except (PermissionError, OSError):
+        # 回退到用户目录
+        user_config_dir = Path.home() / ".duanjuapp" / "config"
+        user_config_dir.mkdir(parents=True, exist_ok=True)
+        return user_config_dir / "config.json"
+
+
 class ConfigManager:
     """应用配置管理器"""
     
-    DEFAULT_CONFIG_PATH = "config/config.json"
     MIN_TIMEOUT = 1000
     MAX_TIMEOUT = 60000
     
     def __init__(self, config_path: Optional[str] = None):
-        self._config_path = Path(config_path or self.DEFAULT_CONFIG_PATH)
+        if config_path:
+            self._config_path = Path(config_path)
+        else:
+            self._config_path = _get_config_path()
         self._config: AppConfig = AppConfig()
         self._load_config()
     

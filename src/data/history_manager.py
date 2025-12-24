@@ -6,16 +6,28 @@ from typing import List, Optional
 
 from ..core.models import DramaInfo, HistoryItem
 from ..utils.json_serializer import serialize_drama, deserialize_drama
+from ..utils.resource_utils import get_app_path
+
+
+def _get_history_path() -> Path:
+    """获取历史文件路径"""
+    data_dir = Path(get_app_path("data"))
+    try:
+        data_dir.mkdir(parents=True, exist_ok=True)
+        return data_dir / "history.json"
+    except (PermissionError, OSError):
+        user_data_dir = Path.home() / ".duanjuapp" / "data"
+        user_data_dir.mkdir(parents=True, exist_ok=True)
+        return user_data_dir / "history.json"
 
 
 class HistoryManager:
     """观看历史管理器 - 管理用户的观看历史，支持 JSON 持久化"""
     
-    DEFAULT_PATH = "data/history.json"
     MAX_HISTORY = 100
     
     def __init__(self, file_path: Optional[str] = None, max_items: int = MAX_HISTORY):
-        self._file_path = Path(file_path or self.DEFAULT_PATH)
+        self._file_path = Path(file_path) if file_path else _get_history_path()
         self._max_items = max_items
         self._history: List[HistoryItem] = []
         self._load()

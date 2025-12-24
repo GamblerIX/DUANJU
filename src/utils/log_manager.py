@@ -6,16 +6,37 @@ logging methods for API requests, user actions, and cache operations.
 """
 import logging
 import sys
+import os
 from datetime import datetime
 from pathlib import Path
 from logging.handlers import RotatingFileHandler
 from typing import Optional
 
 
+def _get_log_dir() -> Path:
+    """获取日志目录，适配不同运行环境"""
+    # 优先使用工作目录下的 logs 目录
+    cwd = os.getcwd()
+    log_dir = Path(cwd) / "logs"
+    
+    # 如果无法在工作目录创建，使用用户目录
+    try:
+        log_dir.mkdir(parents=True, exist_ok=True)
+        # 测试是否可写
+        test_file = log_dir / ".write_test"
+        test_file.touch()
+        test_file.unlink()
+        return log_dir
+    except (PermissionError, OSError):
+        # 回退到用户目录
+        user_log_dir = Path.home() / ".duanjuapp" / "logs"
+        user_log_dir.mkdir(parents=True, exist_ok=True)
+        return user_log_dir
+
+
 class LogManager:
     """日志管理器 - 管理应用日志，支持文件和控制台输出，自动轮转"""
     
-    DEFAULT_LOG_DIR = "logs"
     MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
     BACKUP_COUNT = 5
     
@@ -70,8 +91,8 @@ class LogManager:
         error_handler.setFormatter(error_console_formatter)
         self._logger.addHandler(error_handler)
         
-        log_dir = Path(self.DEFAULT_LOG_DIR)
-        log_dir.mkdir(parents=True, exist_ok=True)
+        # 使用适配的日志目录
+        log_dir = _get_log_dir()
         
         log_file = log_dir / f"duanju_{datetime.now().strftime('%Y%m%d')}.log"
         file_handler = RotatingFileHandler(

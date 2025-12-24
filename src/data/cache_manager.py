@@ -12,8 +12,22 @@ from dataclasses import dataclass
 from collections import OrderedDict
 
 from ..utils.log_manager import get_logger
+from ..utils.resource_utils import get_app_path
 
 logger = get_logger()
+
+
+def _get_cache_dir() -> Path:
+    """获取缓存目录，适配不同运行环境"""
+    cache_dir = Path(get_app_path("cache"))
+    try:
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        return cache_dir
+    except (PermissionError, OSError):
+        # 回退到用户目录
+        user_cache_dir = Path.home() / ".duanjuapp" / "cache"
+        user_cache_dir.mkdir(parents=True, exist_ok=True)
+        return user_cache_dir
 
 
 @dataclass
@@ -40,18 +54,17 @@ class CacheManager:
     
     DEFAULT_TTL = 300000  # 5 分钟
     MAX_MEMORY_ENTRIES = 500
-    CACHE_DIR = "cache"
     
     def __init__(
         self, 
         max_entries: int = MAX_MEMORY_ENTRIES,
         enable_persistence: bool = False,
-        cache_dir: str = CACHE_DIR
+        cache_dir: Optional[str] = None
     ):
         self._cache: OrderedDict[str, CacheEntry] = OrderedDict()
         self._max_entries = max_entries
         self._enable_persistence = enable_persistence
-        self._cache_dir = Path(cache_dir)
+        self._cache_dir = Path(cache_dir) if cache_dir else _get_cache_dir()
         self._hit_count = 0
         self._miss_count = 0
         
