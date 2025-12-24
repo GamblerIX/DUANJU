@@ -275,7 +275,7 @@ class TestLogManagerConstants:
         """测试常量值"""
         from src.utils.log_manager import LogManager
         
-        assert LogManager.DEFAULT_LOG_DIR == "logs"
+        # DEFAULT_LOG_DIR 已移除，改为使用 _get_log_dir() 函数
         assert LogManager.MAX_FILE_SIZE == 10 * 1024 * 1024
         assert LogManager.BACKUP_COUNT == 5
 

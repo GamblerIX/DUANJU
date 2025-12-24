@@ -20,8 +20,9 @@ class TestImageLoaderCoverage:
     @pytest.fixture
     def image_loader(self, tmp_path):
         """创建 ImageLoader 实例"""
-        with patch("src.data.image_loader.ImageLoader.CACHE_DIR", str(tmp_path)):
+        with patch("src.data.image_loader._get_image_cache_dir", return_value=tmp_path):
             loader = ImageLoader()
+            loader._cache_dir = tmp_path
             # Mock QNetworkAccessManager
             loader._network_manager = MagicMock()
             return loader

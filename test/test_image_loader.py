@@ -216,7 +216,7 @@ class TestImageLoaderConstants:
         """测试常量值"""
         from src.data.image_loader import ImageLoader
         
-        assert ImageLoader.CACHE_DIR == "cache/images"
+        # CACHE_DIR 已移除，改为使用 _get_image_cache_dir() 函数
         assert ImageLoader.MAX_CACHE_SIZE == 100 * 1024 * 1024
         assert ImageLoader.MEMORY_CACHE_SIZE == 50
 
@@ -799,7 +799,7 @@ class TestImageLoaderConstants_Coverage:
         """测试常量值"""
         from src.data.image_loader import ImageLoader
         
-        assert ImageLoader.CACHE_DIR == "cache/images"
+        # CACHE_DIR 已移除，改为使用 _get_image_cache_dir() 函数
         assert ImageLoader.MAX_CACHE_SIZE == 100 * 1024 * 1024
         assert ImageLoader.MEMORY_CACHE_SIZE == 50
 
