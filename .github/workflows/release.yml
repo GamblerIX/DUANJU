@@ -157,7 +157,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-pyappify
-          path: pyappify_dist/*
+          path: pyappify_dist/*-release-setup.exe
 
   create-release:
     name: Create Release

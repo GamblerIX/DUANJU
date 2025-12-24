@@ -108,4 +108,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: DuanjuApp-PyAppify-Launcher
-          path: pyappify_dist/*
+          path: pyappify_dist/*-release-setup.exe
