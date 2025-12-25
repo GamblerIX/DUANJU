@@ -33,12 +33,8 @@ class SplashDialog(QDialog):
         self.setWindowTitle("初始化")
         self.setFixedSize(400, 180)
         self.setModal(True)
-        # 设置窗口标志，确保在 PyAppify 环境下也能正常显示
         self.setWindowFlags(
-            Qt.WindowType.Dialog | 
-            Qt.WindowType.CustomizeWindowHint | 
-            Qt.WindowType.WindowTitleHint |
-            Qt.WindowType.WindowStaysOnTopHint  # 确保对话框在最前面
+            Qt.WindowType.Dialog | Qt.WindowType.CustomizeWindowHint | Qt.WindowType.WindowTitleHint
         )
         
         # 设置对话框背景跟随主题（使用 qfluentwidgets 的主题色）
@@ -91,15 +87,6 @@ class SplashDialog(QDialog):
             callback: 任务回调，返回 True 表示成功
         """
         self._tasks.append((name, callback))
-    
-    def show(self) -> None:
-        """重写 show 方法，确保对话框正确显示"""
-        super().show()
-        # 确保对话框在最前面并激活
-        self.raise_()
-        self.activateWindow()
-        # 处理事件，确保窗口绘制
-        QApplication.processEvents()
     
     def start(self) -> None:
         """开始执行初始化任务"""

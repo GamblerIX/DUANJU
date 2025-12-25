@@ -6,11 +6,6 @@ on:
   pull_request:
     branches: [ "main", "master" ]
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Release Version (e.g., v1.0.0)'
-        required: false
-        default: 'v1.0.0'
 
 jobs:
   test:
@@ -35,8 +30,8 @@ jobs:
         run: |
           pytest test/
 
-  build-core:
-    name: Build Core Apps
+  build:
+    name: Build Application
     needs: test
     runs-on: windows-latest
     strategy:
@@ -62,50 +57,30 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # PyInstaller Specifics
+      # PyInstaller - 单文件模式
       - name: Build with PyInstaller
         if: matrix.method == 'pyinstaller'
         run: |
           pip install pyinstaller
-          pyinstaller --noconfirm --onedir --windowed --name "DuanjuApp" --add-data "src;src" --add-data "icons;icons" --icon "icons/icon.ico" main.py
+          pyinstaller --noconfirm --onefile --windowed --name "DuanjuApp" --add-data "src;src" --add-data "icons;icons" --icon "icons/icon.ico" main.py
           
       - name: Upload PyInstaller Artifact
         if: matrix.method == 'pyinstaller'
         uses: actions/upload-artifact@v4
         with:
           name: DuanjuApp-PyInstaller
-          path: dist/DuanjuApp
+          path: dist/DuanjuApp.exe
 
-      # Nuitka Specifics
+      # Nuitka - 单文件模式
       - name: Build with Nuitka
         if: matrix.method == 'nuitka'
         run: |
           pip install nuitka zstandard
-          python -m nuitka --standalone --assume-yes-for-downloads --windows-console-mode=disable --enable-plugin=pyside6 --include-data-dir=icons=icons --include-package=src --output-dir=dist --output-filename=DuanjuApp.exe main.py
+          python -m nuitka --onefile --assume-yes-for-downloads --windows-console-mode=disable --enable-plugin=pyside6 --include-data-dir=icons=icons --include-package=src --output-dir=dist --output-filename=DuanjuApp.exe main.py
           
       - name: Upload Nuitka Artifact
         if: matrix.method == 'nuitka'
         uses: actions/upload-artifact@v4
         with:
           name: DuanjuApp-Nuitka
-          path: dist/main.dist
-
-  build-launcher:
-    name: Build PyAppify Launcher
-    needs: test
-    runs-on: windows-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-          
-      - name: Build with PyAppify Action
-        id: pyappify
-        uses: ok-oldking/pyappify-action@v1.0.19
-        with:
-          version: v1.0.38
-          
-      - name: Upload Launcher Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: DuanjuApp-PyAppify-Launcher
-          path: pyappify_dist/*-release-setup.exe
+          path: dist/DuanjuApp.exe
