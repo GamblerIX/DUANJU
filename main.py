@@ -28,6 +28,38 @@ _write_debug_log(f"CWD: {os.getcwd()}")
 _write_debug_log(f"__file__: {__file__ if '__file__' in dir() else 'N/A'}")
 _write_debug_log(f"sys.path: {sys.path[:5]}")
 
+# 检测 PyAppify 环境并修复 GUI 显示问题
+def _fix_pyappify_gui():
+    """修复 PyAppify 环境下 GUI 无法显示的问题"""
+    try:
+        # 检测是否在 PyAppify 环境中
+        cwd = os.getcwd()
+        if "AppData" in cwd and "Local" in cwd:
+            _write_debug_log("Detected PyAppify environment, applying GUI fixes...")
+            
+            # 设置 Qt 平台插件路径（如果需要）
+            python_dir = os.path.join(cwd, "python")
+            if os.path.exists(python_dir):
+                # 查找 Qt 插件目录
+                for root, dirs, files in os.walk(python_dir):
+                    if "platforms" in dirs and "qwindows.dll" in os.listdir(os.path.join(root, "platforms")):
+                        plugin_path = root
+                        os.environ["QT_PLUGIN_PATH"] = plugin_path
+                        _write_debug_log(f"Set QT_PLUGIN_PATH: {plugin_path}")
+                        break
+            
+            # 确保 QT_QPA_PLATFORM 设置正确
+            if "QT_QPA_PLATFORM" not in os.environ:
+                os.environ["QT_QPA_PLATFORM"] = "windows"
+                _write_debug_log("Set QT_QPA_PLATFORM: windows")
+            
+            return True
+    except Exception as e:
+        _write_debug_log(f"Error in _fix_pyappify_gui: {e}")
+    return False
+
+_fix_pyappify_gui()
+
 # 确保 src 模块可以被导入
 # 对于 PyAppify 环境，工作目录就是应用目录
 app_dir = os.path.dirname(os.path.abspath(__file__))
@@ -59,7 +91,7 @@ try:
     from PySide6.QtCore import Qt
     from PySide6.QtWidgets import QApplication, QMessageBox
     from PySide6.QtGui import QFont
-    _write_debug_log("PySide6 imported successfully")
+    _write_debug_log(f"PySide6 imported successfully, version: {__import__('PySide6').__version__}")
 except ImportError as e:
     early_error_handler(
         "无法加载 PySide6 模块",
@@ -135,6 +167,8 @@ def main() -> int:
 
         # 确保最后一个窗口关闭时应用退出
         app.setQuitOnLastWindowClosed(True)
+        
+        _write_debug_log(f"QApplication created, platform: {app.platformName()}")
 
         # Setup Qt exception hook for debugging
         logger.setup_qt_exception_hook()
@@ -153,10 +187,18 @@ def main() -> int:
             logger.debug("Creating main window...")
             window = MainWindow()
             logger.debug("Main window created successfully")
-            _write_debug_log("MainWindow created, showing...")
+            _write_debug_log(f"MainWindow created, geometry: {window.geometry()}")
+            
+            # 确保窗口可见
+            window.setWindowFlags(window.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
             window.show()
+            window.setWindowFlags(window.windowFlags() & ~Qt.WindowType.WindowStaysOnTopHint)
+            window.show()
+            window.raise_()
+            window.activateWindow()
+            
             logger.info("Main window displayed")
-            _write_debug_log("MainWindow shown, starting initialization...")
+            _write_debug_log(f"MainWindow shown, visible: {window.isVisible()}, geometry: {window.geometry()}")
 
             # Start initialization process
             window.start_initialization()

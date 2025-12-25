@@ -95,7 +95,7 @@ jobs:
         run: |
           pip install pyinstaller
           pyinstaller --noconfirm --onedir --windowed --name "DuanjuApp" --add-data "src;src" --add-data "icons;icons" --icon "icons/icon.ico" main.py
-          Compress-Archive -Path dist/DuanjuApp -DestinationPath dist/DuanjuApp-PyInstaller.zip
+          Compress-Archive -Path dist/DuanjuApp -DestinationPath dist/DuanjuApp-${{ needs.prepare.outputs.version }}-PyInstaller.zip
 
       # Nuitka Build
       - name: Build with Nuitka
@@ -110,7 +110,7 @@ jobs:
             Write-Error "Build output directory 'dist/main.dist' not found. Nuitka build step likely failed."
             exit 1
           }
-          Compress-Archive -Path dist/main.dist -DestinationPath dist/DuanjuApp-Nuitka.zip
+          Compress-Archive -Path dist/main.dist -DestinationPath dist/DuanjuApp-${{ needs.prepare.outputs.version }}-Nuitka.zip
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -139,12 +139,12 @@ jobs:
           # 查找并移动生成的安装包
           $artifacts = Get-ChildItem -Path "pyappify_dist" -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue
           if ($artifacts) {
-            Copy-Item -Path $artifacts[0].FullName -Destination "dist/DuanjuApp-Setup.exe"
+            Copy-Item -Path $artifacts[0].FullName -Destination "dist/DuanjuApp-${{ needs.prepare.outputs.version }}-Setup.exe"
           } else {
             # 备用：查找 zip 文件
             $zips = Get-ChildItem -Path "pyappify_dist" -Filter "*.zip" -Recurse -ErrorAction SilentlyContinue
             if ($zips) {
-              Copy-Item -Path $zips[0].FullName -Destination "dist/DuanjuApp-Launcher.zip"
+              Copy-Item -Path $zips[0].FullName -Destination "dist/DuanjuApp-${{ needs.prepare.outputs.version }}-Launcher.zip"
             }
           }
 
